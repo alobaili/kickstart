@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
-import { Form, Button, Input } from 'semantic-ui-react'
+import { Form, Button, Input, Message } from 'semantic-ui-react'
 import Layout from '../../components/Layout'
 import factory from '../../ethereum/factory'
 import web3 from '../../ethereum/web3'
 
 class CampaignNew extends Component {
     state= {
-        minimumContribution: ''
+        minimumContribution: '',
+        errorMessage: ''
     }
 
     // -- Actions --
@@ -14,15 +15,19 @@ class CampaignNew extends Component {
         // Prevent default submit behaviour
         event.preventDefault()
 
-        // Fetch the list of accounts
-        const accounts = await web3.eth.getAccounts()
+        try {
+            // Fetch the list of accounts
+            const accounts = await web3.eth.getAccounts()
 
-        // Attempt to create a campaign from the first account using the campaign factory
-        await factory.methods
-            .createCampaign(this.state.minimumContribution)
-            .send({
-                from: accounts[0]
-            })
+            // Attempt to create a campaign from the first account using the campaign factory
+            await factory.methods
+                .createCampaign(this.state.minimumContribution)
+                .send({
+                    from: accounts[0]
+                })
+        } catch (error) {
+            this.setState({ errorMessage: error.message })
+        }
     }
 
     // -- Render --
@@ -31,7 +36,7 @@ class CampaignNew extends Component {
             <Layout>
                 <h3>Create a Campaign</h3>
 
-                <Form onSubmit= {this.onSubmit}>
+                <Form onSubmit= {this.onSubmit} error={!!this.state.errorMessage}>
                     <Form.Field>
                         <label>Minimum Contribution</label>
                         <Input
@@ -41,6 +46,7 @@ class CampaignNew extends Component {
                             onChange= {event => this.setState({ minimumContribution: event.target.value })}
                         />
                     </Form.Field>
+                    <Message error header='Ooops!' content={this.state.errorMessage}/>
                     <Button primary>Create</Button>
                 </Form>
             </Layout>
