@@ -3,16 +3,16 @@ import factory from '../ethereum/factory'
 
 class CampaignIndex extends Component {
 
-    // -- Life Cycle --
-    async componentDidMount() {
+    // -- Next.js initial props --
+    /// Used to fetch some information before rendering the page
+    static async getInitialProps() {
         const campaigns = await factory.methods.getDeployedCampaigns().call()
-
-        console.log(campaigns)
+        return { campaigns }
     }
 
     // -- Render --
     render() {
-        return <div>Campaigns Index!</div>
+        return <div>{this.props.campaigns[0]}</div>
     }
 }
 
